@@ -1,0 +1,57 @@
+service: warm-up-example
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  profile: mohsin-dev
+  stage: dev
+  region: us-west-1
+  memorySize: 128 # optional, in MB, default is 1024
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: "*"
+plugins:
+  - serverless-plugin-warmup
+
+custom:
+  warmup:
+    default:
+      enabled: false
+      role: IamRoleLambdaExecution
+      prewarm: true
+      sourceRaw: true
+    # officeHoursWarmer:
+    # cleanFolder: true
+    # events:
+    #   - schedule: cron(0/1 0-23 ? * MON-FRI *)
+    # concurrency: 10
+    # outOfOfficeHoursWarmer:
+    #   enabled: true
+    #   events:
+    #     - schedule: cron(0/5 0-7 ? * MON-FRI *)
+    #     - schedule: cron(0/5 23 ? * MON-FRI *)
+    #     - schedule: cron(0/5 * ? * SAT-SUN *)
+    #   concurrency: 1
+    # testWarmer:
+    #   enabled: false
+
+functions:
+  needToWarm:
+    handler: handler.needToWarm
+    events:
+      - http:
+          path: needToWarm
+          method: get
+    warmup:
+      default:
+        enabled: true
+        # concurrency: 10
+
+  noNeedToWarm:
+    handler: handler.noNeedToWarm
+    events:
+      - http:
+          path: noNeedToWarm
+          method: get
